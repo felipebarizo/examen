@@ -232,6 +232,10 @@ lending_club1 |> ggplot(aes(x = ratio_ingreso_monto, col = Clase)) + geom_boxplo
 
 ```{r}
 
+split <- initial_split(lending_club, prop = 0.7)
+train <- training(split_multi)
+test <- testing(split_multi)
+
 ```
 
 
