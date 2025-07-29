@@ -52,7 +52,7 @@ Esto evitará que el entorno intente ejecutar ese código incompleto y genere er
 1. Crear un vector llamado `ingresos` que contenga los ingresos mensuales de una persona durante un año. Usá la función `runif()` para generar 12 valores aleatorios entre $30.000 y $70.000. Fijar la semilla  `set.seed(12345)`.
 
 ```{r}
-set.seed(1234)
+set.seed(12345)
 ingresos <- runif(12, min = 30000 , max = 70000)
 ```
 
@@ -69,13 +69,25 @@ min(ingresos)
 3. Seleccioná únicamente los meses en los que el ingreso fue mayor a $50.000. Guardá esos valores en un nuevo objeto llamado `ingresos_altos`.  
 
 ```{r}
-ingresos_altos <- which(ingresos > 50000)
+ingresos_altos <- which(ingresos > 50000) #devuelve el mes esta mal, es el segundo
+
+ingresos_altos <- ingresos[ingresos>50000] #devuelve el valor
+
 ```
 
 
 4. Crear un nuevo vector llamado `clasificacion_mensual` que indique si cada mes fue `"alto"` o `"bajo"`, según si el ingreso fue mayor o menor (o igual) al ingreso promedio.
 
 ```{r}
+clasificacion_mensual <- NULL
+i <- 1
+for(i in 1:length(ingresos)){
+  if(ingresos[i] > mean(ingresos))
+    clasificacion_mensual[i] <- "alto"
+  else
+    clasificacion_mensual[i] <- "bajo"
+}
+clasificacion_mensual
 
 ```
 
@@ -83,6 +95,10 @@ ingresos_altos <- which(ingresos > 50000)
 5. Calculá cuántos meses tuvieron ingresos por encima del percentil 75 del vector y mostrálos indicando su posición (número de mes, del 1 al 12).
 
 ```{r}
+percentil75 <- quantile(ingresos, 0.75)
+
+which(ingresos>percentil75)
+
 
 ```
 
@@ -90,7 +106,7 @@ ingresos_altos <- which(ingresos > 50000)
 6. Calculá el coeficiente de variación (CV) del ingreso mensual. Interpreta el resultado obtenido
 
 ```{r}
-
+sd(ingresos)#se desvía en promedio los datos con respecto a la media en 12931.97
 ```
 
 
@@ -118,49 +134,55 @@ El dataset incluye información de personas que solicitaron un préstamo, con va
 1. Cargar el dataset `lending_club` y explorá su estructura.  
 
 ```{r}
+library(dplyr)
 
+library(modeldata)
+data("lending_club")
+lending_club
 ```
 
 
 2. Filtrá los préstamos con monto (`funded_amnt`) superior a $10.000. 
 
 ```{r}
-
+lending_club |> filter(funded_amnt > 10000)
 ```
 
 
 3. Filtrá solo los préstamos con duración (`term`) igual a "term_36".
 
 ```{r}
-
+lending_club |> filter(term=="term_36")
 ```
 
 
 4. Calcular el promedio de `funded_amnt` y `annual_inc` agrupado por `verification_status`. 
 
 ```{r}
-
+lending_club |> group_by(verification_status) |> summarise(prom_funded_amnt = mean(funded_amnt), 
+                                                           prom_annual_inc = mean(annual_inc))
 ```
 
 
 5. Crear un gráfico de dispersión entre `funded_amnt` y `annual_inc`, diferenciando por color según `verification_status`.  
 
 ```{r}
-
+library(ggplot2)
+lending_club |> ggplot(aes(x = funded_amnt, y = annual_inc, col = verification_status)) + geom_point() + theme_bw()
 ```
 
 
 6. Utilizar `facet_wrap()` para mostrar paneles separados por la variable `Class`. 
 
 ```{r}
-
+lending_club |> ggplot(aes(x = funded_amnt, y = annual_inc, col = verification_status)) + geom_point()+ facet_wrap(~Class) + theme_bw()
 ```
 
 
 7. Crear un gráfico de violín que muestre la distribución de `int_rate` (tasa de interés) según la variable `Class`.  
 
 ```{r}
-
+lending_club |> ggplot(aes(x = int_rate, y = Class, fill  =Class)) + geom_violin()+ theme_bw()
 ```
 
 
@@ -169,8 +191,10 @@ El dataset incluye información de personas que solicitaron un préstamo, con va
 
 9. Utilizá `mutate(across(...))` para centrar en la media (valor medio cero) las variables `funded_amnt`, `annual_inc` e `int_rate`.
 
-```{r}
-
+```{r, warning=FALSE}
+library(tidyverse)
+lending_club |> filter(!is.na(funded_amnt),!is.na(annual_inc),!is.na(int_rate)) |>
+  mutate(across(c(funded_amnt,annual_inc,int_rate))) |> summarise(scale_funded_amnt = scale(funded_amnt),scale_annual_inc= scale(annual_inc), scale_int_rate= scale(int_rate))
 ```
 
 
@@ -178,7 +202,7 @@ El dataset incluye información de personas que solicitaron un préstamo, con va
 desviación estándar de todas las variables numéricas.  
 
 ```{r}
-
+lending_club |> group_by(Class) |> summarise(across(where(is.numeric),list(prom = ~mean(.x, na.rm = TRUE), sd = ~sd(.x, na.rm = TRUE))))
 ```
 
 
@@ -188,14 +212,15 @@ desviación estándar de todas las variables numéricas.
     - La variable `Class`.
     
 ```{r}
-
+lending_club1 <- lending_club |> transmute( ratio_ingreso_monto = annual_inc / funded_amnt, tasa_normalizada =pnorm(int_rate,mean = mean(int_rate),sd = sd(int_rate)),
+                                            Clase = Class )
 ```
 
     
 12. Explorá si `ratio_ingreso_monto` es diferente entre préstamos "good" y "bad". Mostralo en un gráfico (por ejemplo, boxplot) y comentá brevemente.
 
 ```{r}
-
+lending_club1 |> ggplot(aes(x = ratio_ingreso_monto, col = Clase)) + geom_boxplot() +theme_bw()
 ```
 
 
