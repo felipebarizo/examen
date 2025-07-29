@@ -52,21 +52,24 @@ Esto evitará que el entorno intente ejecutar ese código incompleto y genere er
 1. Crear un vector llamado `ingresos` que contenga los ingresos mensuales de una persona durante un año. Usá la función `runif()` para generar 12 valores aleatorios entre $30.000 y $70.000. Fijar la semilla  `set.seed(12345)`.
 
 ```{r}
-
+set.seed(1234)
+ingresos <- runif(12, min = 30000 , max = 70000)
 ```
 
 
 2. Calcular el ingreso promedio, el ingreso máximo y el ingreso mínimo. 
 
 ```{r}
-
+mean(ingresos)
+max(ingresos)
+min(ingresos)
 ```
 
 
 3. Seleccioná únicamente los meses en los que el ingreso fue mayor a $50.000. Guardá esos valores en un nuevo objeto llamado `ingresos_altos`.  
 
 ```{r}
-
+ingresos_altos <- which(ingresos > 50000)
 ```
 
 
