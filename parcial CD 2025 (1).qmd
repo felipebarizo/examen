@@ -231,10 +231,13 @@ lending_club1 |> ggplot(aes(x = ratio_ingreso_monto, col = Clase)) + geom_boxplo
 1. Dividir el dataset en conjunto de entrenamiento (70%) y test (30%).
 
 ```{r}
+library(tidymodels)
+library(rpart.plot)
+library(vip)
 
 split <- initial_split(lending_club, prop = 0.7)
-train <- training(split_multi)
-test <- testing(split_multi)
+train <- training(split)
+test <- testing(split)
 
 ```
 
@@ -244,21 +247,21 @@ test <- testing(split_multi)
    - Normalizar variables numéricas  
    
 ```{r}
-
+receta <- recipe(Class~., data = train) |> step_impute_median(all_numeric_predictors()) |>step_normalize(all_numeric_predictors())
 ```
 
    
 3. Entrenar un modelo de **árbol de decisión** para predecir `Class`.
 
 ```{r}
-
+arbol <- decision_tree()|> set_engine("rpart") |> set_mode("classification")
 ```
 
 
 4. Evaluar el modelo en los datos de entrenamiento usando la métrica `accuracy` e interpretá los resultados obtenidos.  
 
 ```{r}
-
+pred_test <- predict(arbol,)
 ```
 
 
