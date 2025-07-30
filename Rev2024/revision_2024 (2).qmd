@@ -101,8 +101,13 @@ En la carpeta Revisión_2024 encontrarás dos archivos `eutic.xlsx` que contiene
 
 **3.1** (2 Puntos)
 
-Leer los datos `eutic.xlsx` usando el paquete `readxl` y `here` para asegurar la reproducibilidad en caso que lo necesites, guardá los datos en un objeto llamado `tic`.
+Leer los datos `eutic.xlsx` usando el paquete `readxl` y `here` para asegurar la reproducibilidad en caso que lo necesites, guardá los datos en un objeto llamado `tic`.    
 ```{r}
+library(readxl)
+library(here)
+library(dplyr)
+library(tidyverse)
+tic <- read_xlsx(here("Rev2024","eutic (2).xlsx"))
 
 
 ```
@@ -112,15 +117,18 @@ Vamos a trabajar con un subconjunto de los datos. Generá un nuevo objeto llamad
 
 De ahora en más trabajaremos con el conjunto de datos reducidos `tic_red`
 ```{r}
+tic_red <- tic |> select(C7: C9, 
+                         C14_1:C14_18)
 
-
+glimpse(tic_red)
 ```
 
 **3.3** (5 puntos)
 
 Usando funciones del paquete `ggplot2`, hacé un gráfico de barras que contenga la cantidad de personas que utilizó alguna vez internet (`C9`). Cambiá los ticks del eje `x`  donde dice 1 debe decir `Si` y donde dice `2` debe decir `No` y en el resto de los ticks nada. Para esta parte debes notar que la variable `C9` es numérica. Cambiá la etiqueta del eje `y` a Cantidad de personas` y la del eje `x` a `Usa internet`. 
 ```{r}
-
+tic_red |> filter(!is.na(C9)) |> mutate(C9_nueva = case_when(C9 ==  2 ~ "No", C9 == 1 ~ "Si")) |> ggplot(aes(x= C9_nueva, fill = C9_nueva)) + 
+  geom_bar() + labs( x = "Usa Internet",  y = "Cantidad de personas", fill = "Respuesta")
 
 ```
 
@@ -135,26 +143,28 @@ Esta pregunta tiene tres partes:
 5. Luego de todos los pasos anteriores repetí el gráfico de la Pregunta 3.3 con  los datos `tic_reco` notando el paso que ya no es necesario luego de las tranformaciones realizadas.
 ```{r}
 
+tic_reco <- tic_red |> rename("usoint" = C9  , "sexo" = C7) |> mutate(usoint = as.factor(usoint), sexo  = as.factor(sexo)) |> 
+  mutate(usoint = recode(usoint, "2" ="No","1" = "Si"),sexo=  recode(sexo,"1" = "Hombre","2" = "Mujer" ))
 
 ```
+
 ```{r}
-
-
-```
-```{r}
-
+tic_reco |> ggplot(aes(x= usoint, fill = usoint)) +  geom_bar() +labs( x = "Usa Internet",  y = "Cantidad de personas", fill = "Respuesta")
 
 ```
+
 **3.5** (4 puntos)
 Modifique el gráfico anterior para obtener las barras en términos de **proporción** en vez de cantidad modificando las leyendas de los ejes de forma apropiada.
 ```{r}
+
+tic_reco |> count(usoint) |> mutate(prop  = n/sum(n)) |> ggplot(aes(x = usoint, y = prop, fill= usoint)) + geom_col() +theme_bw()+labs( x = "Usa Internet",  y = "Proporcio de Uso de internet", fill = "Respuesta")
 
 
 ```
 **3.6** (4 Puntos) 
 Utilizando funciones de `dplyr` respondé ¿Qué proporción de personas que utilizan internet son Mujeres ?
 ```{r}
-
+tic_reco |> select(usoint,sexo)|> count(sexo, usoint) |>group_by(sexo)|> mutate(prop = n / sum(n)) |> filter(sexo == "Mujer" & usoint == "Si")
 
 ```
 **3.7** (6 Punto)
@@ -162,15 +172,18 @@ Utilizando funciones de `dplyr` respondé ¿Qué proporción de personas que uti
 Usando ggplot2 realiza una visualización apropiada a tu elección para ver la distribución de las edades de las personas que nunca usaron internet según sexo. Debes incluir etiquetas apropiadas para los ejes y título. Describe brevemente qué ves en el gráfico y comentá si hay o no diferencias en la edad entre hombres y mujeres.
 
 A su vez usando funciones de `dplyr` respondé ¿Cuál es el promedio de edad de las personas que nunca usaron internet para cada sexo?
-```{r}
 
+```{r}
+tic_reco |> group_by(C8) |> ggplot(aes(x = C8, fill = usoint)) + geom_histogram(bins = 30,color = "black") + facet_wrap(~sexo) + theme_bw()+ 
+  labs(x = "Edades segun sexo", y = "Cantidad de individuos por edad", fill = "Usa Internet")
 
 ```
 **3.8** (5 Puntos)
 
 De forma similar al punto 3.4 re-codificá las variables `C14_1` hasta `C14_18`. Son 18 columnas, utiliza alguna función de `dplyr` que opere sobre múltiples columnas al mismo tiempo. Al revisar los meta datos este grupo de variables tiene la misma codificación, es decir que `1` sea `Si`, `2` sea `No` y `3` sea `No contesta`. Guardá el nuevo conjunto de datos en un objeto `final`.
-```{r}
+```{r, warning=FALSE}
 
+tic_reco |>filter(!is.na(C14_1:C14_18))|> mutate(across(C14_1:C14_18, ~recode(.x,"1"= "Si", "2" = "No", "3" = "No Contesta")))
 
 ```
 \textbf{Nota: Con solo re-codificar la variable es suficiente, no es necesario transformarlo en factor aunque si querés podés hacerlo.}
@@ -193,8 +206,23 @@ Comprobá que el resultado de la función sea
 `pedidos(c("A","B"), 1:3)= Argumento no numérico`
 
 ```{r}
+pedidos <- function(cprod,cdisp){
+  if (!is.numeric(cprod)|| !is.numeric(cdisp)) {
+    cat("Argumento no numérico\n")
+    return(invisible(NULL))
+    }
+  if(length(cprod)!=length(cdisp)) {
+    stop("No tiene mismo largo")
+  }
+  if(all(cdisp >= cprod)){
+    return(1)}
+  else{
+    return(0)
+  }
+}
 
-
+pedidos(c(1,4,2), 1:2)
+pedidos(c("A","B"), 1:19)
 ```
 **4.2** (5 Puntos) 
 
@@ -203,14 +231,21 @@ Generá un vector numérico de 24 valores simulados de una normal con media 20 y
 Utilizando un `while` hacé la suma de los dos vectores (`randnorm` y `randbin`)
 
 ```{r}
-
-
+set.seed(123)
+randnorm <- rnorm(24, mean = 20,sd = 2)
+randbin <- rbinom(24,size = 10,prob = 0.5)
+i <- 1
+while (i <=  24) {
+  suma[i] <- randnorm[i] + randbin[i]
+  i <- i + 1
+}
+print(suma)
 ```
 **4.3** (2.5 Puntos) En clase vimos distintas visualizaciones para variables categóricas y mencionamos como posibles el gráfico de barras y el gráficos de torta.
 
 ¿Cuál es el argumento teórico para decir que es siempre preferible un gráfico de barras a uno de tortas para ver la distribución de una variable categórica?
 ```{r}
-
+"Es preferible dado que tenemos una mejor percepción visual de las frecuencias para cada observacion, el grafico de torta depende de el área y ángulo de mismo el cual dificulta a veces la percepción de la frecuencia" 
 
 ```
 
@@ -219,8 +254,10 @@ Utilizando un `while` hacé la suma de los dos vectores (`randnorm` y `randbin`)
 ¿Porqué es necesario utilizar `aspect.ratio = 1` en un diagrama de dispersión?
 
 ```{r}
+"Utilizar aspect.ratio = 1 en un diagrama de dispersión (scatter plot) significa que la unidad de medida en el eje X es igual a la unidad de medida en el eje Y. Es decir, se fuerza que:
 
-
+1 unidad en el eje horizontal tiene el mismo tamaño visual que 1 unidad en el eje vertical.
+"
 ```
 **4.5** (2.5 Puntos)
 
@@ -228,7 +265,10 @@ Utilizando un `while` hacé la suma de los dos vectores (`randnorm` y `randbin`)
 
 ```{r}
 
+"La investigación reproducible es aquella en la que cualquier persona puede volver a ejecutar tu análisis y obtener los mismos resultados, porque tiene acceso a los datos, el código y los pasos exactos que seguiste.
 
+No se trata solo de compartir los resultados finales, sino de documentar todo el proceso, desde la limpieza de datos hasta los gráficos y modelos utilizados.
+RMARKDOWN"
 ```
 **4.6** (2.5 Puntos) 
 
@@ -236,6 +276,24 @@ Utilizando un `while` hacé la suma de los dos vectores (`randnorm` y `randbin`)
 
 ```{r}
 
+"
+La ciencia de datos es una disciplina que se encarga de extraer conocimiento útil a partir de datos. Combina programación, matemáticas, estadística y conocimiento del área para entender patrones, responder preguntas o tomar decisiones basadas en datos.
+
+Es como una caja de herramientas para convertir datos crudos en información valiosa, ya sea para predecir algo, explicar un fenómeno o automatizar decisiones.
+
+La estadística es el corazón de la ciencia de datos. Sirve para:
+
+Describir y resumir los datos (media, varianza, gráficos).
+
+Inferir cosas sobre una población a partir de una muestra (estimaciones, intervalos, tests).
+
+Modelar relaciones entre variables (regresión, clasificación).
+
+Medir incertidumbre y validar resultados.
+
+En resumen, la estadística permite que los análisis sean rigurosos y confiables, y no solo visualmente atractivos o impulsados por algoritmos.
+
+La ciencia de datos transforma datos en decisiones. Y la estadística es la parte que asegura que esas decisiones estén basadas en evidencia y no en casualidades."
 
 ```
 
