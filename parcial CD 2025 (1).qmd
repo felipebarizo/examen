@@ -255,34 +255,47 @@ receta <- recipe(Class~., data = train) |> step_impute_median(all_numeric_predic
 
 ```{r}
 arbol <- decision_tree()|> set_engine("rpart") |> set_mode("classification")
+wf_lend <- workflow() |> add_model(arbol) |> add_recipe(receta)
+ajuste_arbol <- fit(wf_lend ,data = train)
+
+pred <- predict(ajuste_arbol, test) |> bind_cols(test)
+
 ```
 
 
 4. Evaluar el modelo en los datos de entrenamiento usando la métrica `accuracy` e interpretá los resultados obtenidos.  
 
 ```{r}
-pred_test <- predict(arbol,)
+metricas <- metric_set(accuracy)
+pred |> metricas(truth = Class, estimate = .pred_class)
+
 ```
 
 
 5. Generar y visualizar la matriz de confusión.  
 
 ```{r}
-
+conf_mat(pred, truth = Class, estimate = .pred_class) |> autoplot(type = "heatmap")
 ```
 
 
 6. Generar la visualización del árbol y comentar brevemente los resultados obtenidos.  
 
 ```{r}
+modelo_rpart <- extract_fit_parsnip(ajuste_arbol)
 
+rpart.plot(modelo_rpart$fit)
 ```
 
 
 7. Entrenar un modelo logístico (**logit**) para predecir `Class`, usando la misma receta definida antes. 
 
 ```{r}
+logit <- logistic_reg() |> set_engine("glm") |> set_mode("classification")
+wf_lend <- workflow() |> add_model(logit) |> add_recipe(receta)
+ajuste_arbol <- fit(wf_lend ,data = train)
 
+pred1 <- predict(ajuste_arbol, test) |> bind_cols(test)
 ```
 
 
@@ -290,12 +303,17 @@ pred_test <- predict(arbol,)
 
 ```{r}
 
+pred |> metricas(truth = Class, estimate = .pred_class)
+
+pred1|> metricas(truth = Class, estimate = .pred_class)
+
 ```
 
 
 9. ¿Qué variables tienen mayor peso en el modelo logístico?
 
 ```{r}
-
+modelo_logit <- extract_fit_parsnip(ajuste_arbol)
+vip(modelo_logit$fit)
 ```
 
