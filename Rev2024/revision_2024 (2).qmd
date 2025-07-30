@@ -42,7 +42,12 @@ Este ejercicio debe ser resuelto con R base en caso contrario se especificará e
 **2.1** (3 Puntos) Generá un `data.frame` con tres columnas nombradas como `var1`, `var2`, `var3`, y 12 filas siendo `var1` un vector numérico con posibles valores 2, 3 y 4, con más de una observación para cada posible valor, `var2` un factor con tres niveles, `alto`, `medio` y  `bajo` con más de una observación para cada posible valor y `var3` un vector lógico  Guardá el `data.frame` en un objeto llamado `datos`
 
 ```{r}
+set.seed(123)
+var1 <- sample(c(2,3,4),size =12, replace = TRUE)
+var2 <- sample(c("alto","medio","bajo"), size = 12, replace = TRUE)
+var3 <- sample(c(TRUE, FALSE), size = 12, replace = TRUE)
 
+datos <- data.frame(var1,var2,var3)
 
 ```
 
@@ -50,12 +55,12 @@ Este ejercicio debe ser resuelto con R base en caso contrario se especificará e
 **2.2** (2 Puntos)  Usando R base, seleccioná del conjunto datos la tercera columna en base a su nombre (`var3`)
 
 ```{r}
-
+datos[,"var3"]
 
 ```
 **2.3** (5 Puntos) Usando R base, seleccioná las filas de `datos` donde `var1` es 3, `var2` es medio y `var3` es FALSE.
 ```{r}
-
+datos[datos$var1 == 3 & datos$var2 == "medio" & datos$var3 == FALSE,]
 
 ```
 
@@ -63,20 +68,27 @@ Este ejercicio debe ser resuelto con R base en caso contrario se especificará e
 
 ```{r}
 
+datos[datos$var2 == c("alto","medio"),]
 
 ```
 
 **2.5** (2 Puntos) Hacer una tabla que cuente la cantidad de observaciones para cada combinación de `var2` y `var3`
 
 ```{r}
-
+table(datos$var2,datos$var3)
 
 ```
 **2.6** (10 Puntos) Usando un for loop generá una nueva variable en el objeto `datos` llamada `var4` que valga 1 si (`var2` es alto y `var3` es TRUE) o (`var2` es medio y `var3` es TRUE)  y vale 0 en otro caso
 
 ```{r}
-
-
+for (i in 1: length(datos$var1)) {
+  if ((datos$var2[i] == "alto" & datos$var3[i] == "TRUE") || (datos$var2[i] == "medio" & datos$var3[i] == "TRUE")){
+    datos$var4[i] <- 1
+    }else{
+      datos$var4[i] <- 0 
+  }
+}
+datos
 ```
 
 # Ejercicio 3 (tidyverse)
