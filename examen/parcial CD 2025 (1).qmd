@@ -1,7 +1,7 @@
 ---
 title: "Primera revisión"
 format: html
-author: "Nombre Apellido - CI"
+author: "hola"
 ---
 
 La presente evaluación es de carácter **individual** y tiene una duración total de **2 horas**. A continuación, se detallan las condiciones y criterios que deben respetarse para su correcta realización:
