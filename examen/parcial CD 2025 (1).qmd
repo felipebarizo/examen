@@ -1,0 +1,266 @@
+---
+title: "Primera revisión"
+format: html
+author: "Nombre Apellido - CI"
+---
+
+La presente evaluación es de carácter **individual** y tiene una duración total de **2 horas**. A continuación, se detallan las condiciones y criterios que deben respetarse para su correcta realización:
+
+##  Modalidad de la prueba
+
+- Cada estudiante debe **resolver la prueba de forma individual**, sin interactuar con otras personas durante su desarrollo.  
+- Si surge alguna duda, pueden consultar directamente al equipo docente durante el horario asignado para la prueba.
+
+##Materiales permitidos
+
+Durante la evaluación se permite el uso exclusivo de los siguientes materiales:
+
+- El libro del curso: [https://r4ds.hadley.nz](https://r4ds.hadley.nz)  
+- Las presentaciones utilizadas en clase  
+- Tus apuntes personales  
+- Actividades y tareas ya realizadas en el marco del curso  
+
+**No está permitido** consultar ningún otro material adicional, ni intercambiar información, comentarios o sugerencias con personas ajenas al equipo docente.  
+Cualquier incumplimiento de estas condiciones implicará la **invalidación de la prueba**.
+
+## Instrucciones técnicas y de entrega (**IMPORTANTE**)
+
+- Completá tu **nombre y cédula de identidad (CI)** en el campo `author:` del YAML del archivo `.qmd`, siguiendo este formato:  
+  `author: "Nombre Apellido - CI"`  
+- Los archivos y la información necesaria para el desarrollo de la prueba están disponibles en EVA, en la pestaña **Revisión_2025**.  
+- La entrega de la prueba será por GitHub, el repositorio debe ser **privado**, llamarse `REV_CDR_25` e invitar a Juan Pablo (jpferreira33) y a Mauro (mauroloprete).
+
+
+## Criterios de evaluación
+
+- Parte de la calificación se basa en que tu entrega sea **reproducible**, es decir, que los resultados puedan generarse sin errores al ejecutar el documento.  
+- También se evaluará la **organización y estructura del repositorio**, de acuerdo con lo solicitado en el punto final.
+
+## Recomendaciones finales
+
+- La prueba incluye **puntos parciales**, por lo tanto, si alguna parte del código no funciona o no está completa, agregá debajo de ese bloque la siguiente instrucción:  
+
+```r
+#| eval: false
+```  
+
+Esto evitará que el entorno intente ejecutar ese código incompleto y genere errores al compilar el documento.
+
+
+## Parte 1 – Fundamentos de R base (20 puntos)
+
+1. Crear un vector llamado `ingresos` que contenga los ingresos mensuales de una persona durante un año. Usá la función `runif()` para generar 12 valores aleatorios entre $30.000 y $70.000. Fijar la semilla  `set.seed(12345)`.
+
+```{r}
+
+```
+
+
+2. Calcular el ingreso promedio, el ingreso máximo y el ingreso mínimo. 
+
+```{r}
+
+```
+
+
+3. Seleccioná únicamente los meses en los que el ingreso fue mayor a $50.000. Guardá esos valores en un nuevo objeto llamado `ingresos_altos`.  
+
+```{r}
+
+```
+
+
+4. Crear un nuevo vector llamado `clasificacion_mensual` que indique si cada mes fue `"alto"` o `"bajo"`, según si el ingreso fue mayor o menor (o igual) al ingreso promedio.
+
+```{r}
+
+```
+
+
+5. Calculá cuántos meses tuvieron ingresos por encima del percentil 75 del vector y mostrálos indicando su posición (número de mes, del 1 al 12).
+
+```{r}
+
+```
+
+
+6. Calculá el coeficiente de variación (CV) del ingreso mensual. Interpreta el resultado obtenido
+
+```{r}
+
+```
+
+
+---
+
+## Sobre el dataset `lending_club`
+
+Para las partes 2 y 3 se utilizará el dataset `lending_club` del paquete `modeldata`, basado en préstamos personales otorgados en la plataforma *Lending Club* en 2016.
+
+El dataset incluye información de personas que solicitaron un préstamo, con variables como:
+
+- `funded_amnt`: monto del préstamo financiado  
+- `term`: duración del préstamo  
+- `int_rate`: tasa de interés  
+- `annual_inc`: ingreso anual del solicitante  
+- `emp_length`: años de empleo  
+- `revol_util`: utilización del crédito rotativo  
+- `verification_status`: estado de verificación de ingresos  
+- `Class`: variable binaria que indica si el préstamo es considerado `"good"` o `"bad"`
+
+---
+
+## Parte 2 – Análisis exploratorio de datos y visualización (40 puntos)
+
+1. Cargar el dataset `lending_club` y explorá su estructura.  
+
+```{r}
+
+```
+
+
+2. Filtrá los préstamos con monto (`funded_amnt`) superior a $10.000. 
+
+```{r}
+
+```
+
+
+3. Filtrá solo los préstamos con duración (`term`) igual a "term_36".
+
+```{r}
+
+```
+
+
+4. Calcular el promedio de `funded_amnt` y `annual_inc` agrupado por `verification_status`. 
+
+```{r}
+
+```
+
+
+5. Crear un gráfico de dispersión entre `funded_amnt` y `annual_inc`, diferenciando por color según `verification_status`.  
+
+```{r}
+
+```
+
+
+6. Utilizar `facet_wrap()` para mostrar paneles separados por la variable `Class`. 
+
+```{r}
+
+```
+
+
+7. Crear un gráfico de violín que muestre la distribución de `int_rate` (tasa de interés) según la variable `Class`.  
+
+```{r}
+
+```
+
+
+8. Escribir una breve descripción de lo que observás en los gráficos (2 o 3 oraciones).
+
+
+9. Utilizá `mutate(across(...))` para centrar en la media (valor medio cero) las variables `funded_amnt`, `annual_inc` e `int_rate`.
+
+```{r}
+
+```
+
+
+10. Utilizá `summarise(across(...))` para calcular, para cada categoría de `Class`, el promedio y la
+desviación estándar de todas las variables numéricas.  
+
+```{r}
+
+```
+
+
+11. Usando `transmute()`, creá un nuevo data frame que contenga únicamente:
+    - Una variable `ratio_ingreso_monto`, definida como `annual_inc / funded_amnt`.
+    - Una variable `tasa_normalizada`, escalando `int_rate` entre 0 y 1.
+    - La variable `Class`.
+    
+```{r}
+
+```
+
+    
+12. Explorá si `ratio_ingreso_monto` es diferente entre préstamos "good" y "bad". Mostralo en un gráfico (por ejemplo, boxplot) y comentá brevemente.
+
+```{r}
+
+```
+
+
+---
+ 
+## Parte 3 – Clasificación supervisada con tidymodels (40 puntos)
+
+1. Dividir el dataset en conjunto de entrenamiento (70%) y test (30%).
+
+```{r}
+
+```
+
+
+2. Definir una receta con los siguientes pasos:  
+   - Imputar valores faltantes por la mediana (si los hay)  
+   - Normalizar variables numéricas  
+   
+```{r}
+
+```
+
+   
+3. Entrenar un modelo de **árbol de decisión** para predecir `Class`.
+
+```{r}
+
+```
+
+
+4. Evaluar el modelo en los datos de entrenamiento usando la métrica `accuracy` e interpretá los resultados obtenidos.  
+
+```{r}
+
+```
+
+
+5. Generar y visualizar la matriz de confusión.  
+
+```{r}
+
+```
+
+
+6. Generar la visualización del árbol y comentar brevemente los resultados obtenidos.  
+
+```{r}
+
+```
+
+
+7. Entrenar un modelo logístico (**logit**) para predecir `Class`, usando la misma receta definida antes. 
+
+```{r}
+
+```
+
+
+8. Compará los modelos dos en el conjunto de entrenamiento usando `accuracy`. ¿Cuál modelo tuvo mejor desempeño general?  
+
+```{r}
+
+```
+
+
+9. ¿Qué variables tienen mayor peso en el modelo logístico?
+
+```{r}
+
+```
+
