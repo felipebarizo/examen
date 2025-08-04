@@ -41,24 +41,49 @@ Este ejercicio debe ser resuelto con R base en caso contrario se especificará e
 
 **2.1** (3 Puntos) Generá un `data.frame` con tres columnas nombradas como `var1`, `var2`, `var3`, y 12 filas siendo `var1` un vector numérico con posibles valores 2, 3 y 4, con más de una observación para cada posible valor, `var2` un factor con tres niveles, `alto`, `medio` y  `bajo` con más de una observación para cada posible valor y `var3` un vector lógico  Guardá el `data.frame` en un objeto llamado `datos`
 
+```{r}
+set.seed(123)
+var1 <- sample(c(2,3,4), size = 12, replace = TRUE)
+var2 <- sample(c("alto", "medio", "bajo"), size = 12, replace = TRUE)
+var3 <- sample(c("TRUE", "FALSE"), size = 12,replace = TRUE)
+datos <- data.frame(var1,var2,var3)
 
+```
 
 
 **2.2** (2 Puntos)  Usando R base, seleccioná del conjunto datos la tercera columna en base a su nombre (`var3`)
-
+```{r}
+datos[,"var3"]
+```
 **2.3** (5 Puntos) Usando R base, seleccioná las filas de `datos` donde `var1` es 3, `var2` es medio y `var3` es FALSE.
 
-
+```{r}
+datos[datos$var1 == 3 & datos$var2== "medio" & datos$var3 == "FALSE",]
+```
 **2.4** (3 Puntos) Usando R base, seleccioná las filas donde `var2` toma los valores medio y alto
-
+```{r}
+datos[datos$var2 == c("medio","alto"),]
+```
 
 
 **2.5** (2 Puntos) Hacer una tabla que cuente la cantidad de observaciones para cada combinación de `var2` y `var3`
+```{r}
+table(datos$var2,datos$var3)
 
+```
 
 **2.6** (10 Puntos) Usando un for loop generá una nueva variable en el objeto `datos` llamada `var4` que valga 1 si (`var2` es alto y `var3` es TRUE) o (`var2` es medio y `var3` es TRUE)  y vale 0 en otro caso
 
-
+```{r}
+for (i in 1:length(var2)) {
+  if ((datos$var2[i] == "alto" & datos$var3[i] == "TRUE")||(datos$var2[i] == "medio" & datos$var3[i] == "TRUE")){
+    datos$var4[i] <- 1
+  }else{
+    datos$var4[i] <- 0
+  }
+}
+datos
+```
 
 # Ejercicio 3 (tidyverse)
 ## (35 Puntos){-}
@@ -71,19 +96,32 @@ En la carpeta Revisión_2024 encontrarás dos archivos `eutic.xlsx` que contiene
 **3.1** (2 Puntos)
 
 Leer los datos `eutic.xlsx` usando el paquete `readxl` y `here` para asegurar la reproducibilidad en caso que lo necesites, guardá los datos en un objeto llamado `tic`.
+```{r}
+library(readxl)
+library(here)
+tic <- read_xlsx(here("examen","eutic (2).xlsx"))
 
+```
 **3.2** (2 Puntos)
 
 Vamos a trabajar con un subconjunto de los datos. Generá un nuevo objeto llamado `tic_red` que contenga las variables desde `C7` hasta `C9` y `C14_1` hasta `C14_18`(en el archivo `diccionario.xls` podés encontrar el nombre de todas las variables junto con su descripción). El conjunto de datos reducidos (`tic_red`) debe tener 2341 filas y 21 columnas.
 
 De ahora en más trabajaremos con el conjunto de datos reducidos `tic_red`
 
+```{r}
+tic_red <- tic[,c(23:25,54:71)]
 
+```
 **3.3** (5 puntos)
 
 Usando funciones del paquete `ggplot2`, hacé un gráfico de barras que contenga la cantidad de personas que utilizó alguna vez internet (`C9`). Cambiá los ticks del eje `x`  donde dice 1 debe decir `Si` y donde dice `2` debe decir `No` y en el resto de los ticks nada. Para esta parte debes notar que la variable `C9` es numérica. Cambiá la etiqueta del eje `y` a Cantidad de personas` y la del eje `x` a `Usa internet`. 
 
+```{r}
+library(ggplot2)
+library(tidyverse)
+tic_red |> mutate(C9 = recode(C9, "1" = "Si","2"  ="No" )) |> ggplot(aes(x = C9, fill= C9))+ geom_bar() + labs(x = "Usa Internet",y = "Cantidad de Personas", fill = "Respuesta")
 
+```
 
 **3.4** (7 Puntos)
 Esta pregunta tiene tres partes:
@@ -93,24 +131,55 @@ Esta pregunta tiene tres partes:
 3. Recodificá la variable `usoint` para que `1` sea `Si` y `2` sea `No` y recodificá `sexo` para que `1` sea `Hombre` y `2` sea `Mujer`
 4. Guardá los datos modificados en `tic_reco`
 5. Luego de todos los pasos anteriores repetí el gráfico de la Pregunta 3.3 con  los datos `tic_reco` notando el paso que ya no es necesario luego de las tranformaciones realizadas.
+```{r}
+tic_reco <- tic_red |> rename("usoint" = C9, "sexo" = C7) |> mutate(usoint =as.factor(usoint), sexo = as.factor(sexo)) |> 
+  mutate(usoint = recode(usoint,"1" = "Si","2"="No"), sexo = recode(sexo,"1"="Hombre", "2" = "Mujer"))
 
+```
 
+```{r}
+tic_reco |> ggplot(aes(x = usoint, fill= usoint))+ geom_bar()+  labs(x = "Usa Internet",y = "Cantidad de Personas", fill = "Respuesta")
+```
 **3.5** (4 puntos)
 Modifique el gráfico anterior para obtener las barras en términos de **proporción** en vez de cantidad modificando las leyendas de los ejes de forma apropiada.
-
+```{r}
+tic_reco |> count(usoint) |> mutate(prop = n/sum(n)) |> ggplot(aes(x = usoint, y = prop, fill = usoint)) + geom_col() +
+    labs(x = "Usa Internet",y = "Proporción de la poblacion que usa internet", fill = "Respuesta")
+```
 **3.6** (4 Puntos) 
 Utilizando funciones de `dplyr` respondé ¿Qué proporción de personas que utilizan internet son Mujeres ?
-
+```{r}
+library(dplyr)
+tic_reco |> count(usoint,sexo) |> mutate(prop = n/sum(n)) |> filter(sexo == "Mujer", usoint == "Si")
+```
 **3.7** (6 Punto)
 
 Usando ggplot2 realiza una visualización apropiada a tu elección para ver la distribución de las edades de las personas que nunca usaron internet según sexo. Debes incluir etiquetas apropiadas para los ejes y título. Describe brevemente qué ves en el gráfico y comentá si hay o no diferencias en la edad entre hombres y mujeres.
 
 A su vez usando funciones de `dplyr` respondé ¿Cuál es el promedio de edad de las personas que nunca usaron internet para cada sexo?
+```{r}
+tic_reco |> group_by(sexo)|> filter(usoint == "No")|> summarise(prom_Edad_no_usoint = mean(C8,na.rm = TRUE))
 
+
+tic_reco |> ggplot(aes(x = C8,fill = usoint)) + geom_histogram(bins = 30,color = "black") + labs(title = "Distribucion de edades que nunca usaron internet", x = "Edades", y = "Cantidad de Gente")+ facet_wrap(~sexo) + theme_bw()
+
+tic_reco |> group_by(C8) |> ggplot(aes(x = C8, fill = usoint)) + geom_histogram(bins = 30,color = "black") + facet_wrap(~sexo) + theme_bw()+ 
+  labs(x = "Edades segun sexo", y = "Cantidad de individuos por edad", fill = "Usa Internet")
+```
 **3.8** (5 Puntos)
 
 De forma similar al punto 3.4 re-codificá las variables `C14_1` hasta `C14_18`. Son 18 columnas, utiliza alguna función de `dplyr` que opere sobre múltiples columnas al mismo tiempo. Al revisar los meta datos este grupo de variables tiene la misma codificación, es decir que `1` sea `Si`, `2` sea `No` y `3` sea `No contesta`. Guardá el nuevo conjunto de datos en un objeto `final`.
+```{r}
+final <- tic_reco|> filter(!is.na(C14_1:C14_18)) |> mutate(across(C14_1:C14_18,~recode(.x,"1" = "Si", "2" = "No", "3" = "No contesta")))
 
+final <- tic_reco |> 
+  mutate(across(C14_1:C14_18, ~ recode(as.character(.x),
+                                       "1" = "Si",
+                                       "2" = "No",
+                                       "3" = "No contesta"))) |>
+  filter(if_all(C14_1:C14_18, ~ !is.na(.x)))
+
+```
 \textbf{Nota: Con solo re-codificar la variable es suficiente, no es necesario transformarlo en factor aunque si querés podés hacerlo.}
 
 
@@ -130,33 +199,112 @@ Comprobá que el resultado de la función sea
 
 `pedidos(c("A","B"), 1:3)= Argumento no numérico`
 
+```{r}
+pedidos <- function(cprod,cdisp){
+  if (!is.numeric(cprod)|| !is.numeric(cdisp)) {
+    cat("Argumento no numérico\n")
+    return(invisible(NULL))
+    }
+  if(length(cprod)!=length(cdisp)) {
+    stop("No tiene mismo largo")
+  }
+  if(all(cdisp >= cprod)){
+    return(1)}
+  else{
+    return(0)
+  }
+}
 
+pedidos(c(1,4,2), 1:2)
+pedidos(c("A","B"), 1:19)
+```
 **4.2** (5 Puntos) 
 
 Generá un vector numérico de 24 valores simulados de una normal con media 20 y desvío 2 usando `rnorm` y nombralo `randnorm` y otro vector de la misma longitud generados con `rbinom` con probabilidad 0.5 y número de eventos posibles 10 nombrá al vector como  `randbin`.
 
 Utilizando un `while` hacé la suma de los dos vectores (`randnorm` y `randbin`)
+```{r}
+set.seed(123)
+randnorm <- rnorm(24, mean = 20, sd = 2)
+randbin <- rbinom(24,size = 10,prob = 0.5)
 
+i <- 1
+suma <- NULL
+while (i <= 24) {
+  suma[i] <- randnorm[i] + randbin[i] 
+  i <- i + 1
+}
+suma
+length(suma)
+
+```
 
 **4.3** (2.5 Puntos) En clase vimos distintas visualizaciones para variables categóricas y mencionamos como posibles el gráfico de barras y el gráficos de torta.
 
 ¿Cuál es el argumento teórico para decir que es siempre preferible un gráfico de barras a uno de tortas para ver la distribución de una variable categórica?
+```{r}
+"Es preferible dado que tenemos una mejor percepción visual de las frecuencias para cada observacion, el grafico de torta depende de el área y ángulo de mismo el cual dificulta a veces la percepción de la frecuencia" 
 
+```
 
 **4.4** (2.5 Puntos)
 
 ¿Porqué es necesario utilizar `aspect.ratio = 1` en un diagrama de dispersión?
+```{r}
+"Utilizar aspect.ratio = 1 en un diagrama de dispersión (scatter plot) significa que la unidad de medida en el eje X es igual a la unidad de medida en el eje Y. Es decir, se fuerza que:
 
+1 unidad en el eje horizontal tiene el mismo tamaño visual que 1 unidad en el eje vertical.
+"
+```
 
 **4.5** (2.5 Puntos)
 
 ¿Con tus palabras definí qué es la investigación reproducible y mencioná alguna herramienta que lo facilita y porqué?
 
+```{r}
+"Utilizar aspect.ratio = 1 en un diagrama de dispersión (scatter plot) significa que la unidad de medida en el eje X es igual a la unidad de medida en el eje Y. Es decir, se fuerza que:
 
+1 unidad en el eje horizontal tiene el mismo tamaño visual que 1 unidad en el eje vertical.
+"
+```
 **4.6** (2.5 Puntos) 
 
 ¿Con tus palabras definí qué es la ciencia de datos y qué rol tiene la estadística en ella? 
 
+```{r}
+"
+La ciencia de datos es una disciplina que se encarga de extraer conocimiento útil a partir de datos. Combina programación, matemáticas, estadística y conocimiento del área para entender patrones, responder preguntas o tomar decisiones basadas en datos.
 
+Es como una caja de herramientas para convertir datos crudos en información valiosa, ya sea para predecir algo, explicar un fenómeno o automatizar decisiones.
+
+La estadística es el corazón de la ciencia de datos. Sirve para:
+
+Describir y resumir los datos (media, varianza, gráficos).
+
+Inferir cosas sobre una población a partir de una muestra (estimaciones, intervalos, tests).
+
+Modelar relaciones entre variables (regresión, clasificación).
+
+Medir incertidumbre y validar resultados.
+
+En resumen, la estadística permite que los análisis sean rigurosos y confiables, y no solo visualmente atractivos o impulsados por algoritmos.
+
+La ciencia de datos transforma datos en decisiones. Y la estadística es la parte que asegura que esas decisiones estén basadas en evidencia y no en casualidades."
+
+
+"La ciencia de datos es una disciplina que combina herramientas de la informática, la estadística y el conocimiento del área de estudio para extraer conocimiento útil a partir de los datos. Implica todo un proceso: desde recolectar y limpiar los datos, analizarlos e interpretarlos, hasta comunicar los resultados de forma clara y comprensible para tomar decisiones informadas.
+
+La estadística es una parte clave de la ciencia de datos porque:
+
+Permite describir los datos con medidas como la media, la mediana, las distribuciones, etc.
+
+Ayuda a entender relaciones entre variables (por ejemplo, con regresiones, correlaciones).
+
+Proporciona métodos para hacer inferencias: es decir, sacar conclusiones sobre una población a partir de una muestra.
+
+Sirve para evaluar la incertidumbre y la calidad de los resultados (por ejemplo, con intervalos de confianza y tests de hipótesis).
+
+La estadística es el motor analítico de la ciencia de datos: aporta los fundamentos para entender los datos y justificar las decisiones que se toman a partir de ellos."
+```
 
 
