@@ -92,6 +92,8 @@ print(clasificacion_mensual)
 5. Calculá cuántos meses tuvieron ingresos por encima del percentil 75 del vector y mostrálos indicando su posición (número de mes, del 1 al 12).
 
 ```{r}
+percentil75 <- quantile(ingresos, 0.75)
+which(ingresos>percentil75)
 
 ```
 
@@ -99,7 +101,13 @@ print(clasificacion_mensual)
 6. Calculá el coeficiente de variación (CV) del ingreso mensual. Interpreta el resultado obtenido
 
 ```{r}
-
+media <- mean(ingresos)
+sd <- sd(ingresos)
+cv <- (sd/media)*100
+cv
+"El CV de 24.86% indica que el desvío estándar de los ingresos representa cerca del 25% de la media.
+Esto implica una variabilidad moderada en los ingresos mensuales:
+hay cierta dispersión, pero no es extremadamente alta."
 ```
 
 
