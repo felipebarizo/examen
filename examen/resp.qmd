@@ -295,3 +295,67 @@ Sirve para evaluar la incertidumbre y la calidad de los resultados (por ejemplo,
 La estadística es el motor analítico de la ciencia de datos: aporta los fundamentos para entender los datos y justificar las decisiones que se toman a partir de ellos."
 ```
 
+```{r}
+library(tidymodels)
+library(rpart.plot)
+library(vip)
+split <- initial_split(lending_club, 0.7)
+train <- training(split)
+test <- testing(split)
+
+```
+
+```{r}
+receta <- recipe(Class~., data =train) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_normalize(all_numeric_predictors())
+
+```
+
+```{r}
+arbol <- decision_tree() |> set_engine("rpart") |> set_mode("classification")
+wf_lend <- workflow() |> add_model(arbol) |> add_recipe(receta)
+ajuste_arbol <- fit(wf_lend, data =  train)
+
+pred <- predict(ajuste_arbol, test) |> bind_cols(test)
+```
+
+```{r}
+pred1 <- predict(ajuste_arbol, train) |> bind_cols(train)
+metricas <- metric_set(accuracy)
+pred1 |> metricas(truth = Class, estimate = .pred_class)
+
+```
+
+```{r}
+conf_mat(pred1, truth = Class, estimate = .pred_class) |> autoplot(type = "heatmap")
+
+```
+
+```{r}
+modelo_rpart <- extract_fit_parsnip(ajuste_arbol)
+
+rpart.plot(modelo_rpart$fit)
+```
+
+```{r}
+logit <- logistic_reg() |> set_engine("glm") |> set_mode("classification")
+wf_lend <- workflow() |> add_model(logit) |> add_recipe(receta)
+ajuste_arbol <- fit(wf_lend ,data = train)
+
+pred2 <- predict(ajuste_arbol, test) |> bind_cols(test)
+```
+
+
+```{r}
+pred3 <- predict(ajuste_arbol, train) |> bind_cols(train)
+pred1 |> metricas(truth = Class,estimate = .pred_class)
+pred3 |> metricas(truth = Class,estimate = .pred_class)
+
+```
+
+```{r}
+modelo_logit <- extract_fit_parsnip(ajuste_arbol)
+vip(modelo_logit$fit)
+```
+
