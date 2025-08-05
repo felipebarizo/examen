@@ -38,6 +38,51 @@ datos
 ```
 
 #REV 2025
+```{r}
+set.seed(12345)
+ingresos <- runif(12, min = 30000,max = 70000)
+```
+
+```{r}
+mean(ingresos)
+max(ingresos)
+min(ingresos)
+
+```
+
+```{r}
+ingresos_altos <- ingresos[ingresos > 50000]
+```
+
+```{r}
+clasificacion_mensual <- NULL
+for (i in 1:length(ingresos)) {
+  if(ingresos[i] <= mean(ingresos)){
+    clasificacion_mensual[i] <- "bajo"
+  } else {
+      clasificacion_mensual[i] <- "alto"
+    }
+}
+print(clasificacion_mensual)
+```
+
+```{r}
+percentil75 <- quantile(ingresos, 0.75)
+which(ingresos>percentil75)
+
+```
+
+```{r}
+media <- mean(ingresos)
+sd <- sd(ingresos)
+cv <- (sd/media)*100
+cv
+"El CV de 24.86% indica que el desvío estándar de los ingresos representa cerca del 25% de la media.
+Esto implica una variabilidad moderada en los ingresos mensuales:
+hay cierta dispersión, pero no es extremadamente alta."
+```
+
+
 
 #TIDYVERSE
 
@@ -102,6 +147,60 @@ final <- tic_reco |>
 
 ```
 
+#REV 2025
+
+```{r}
+library(modeldata)
+data("lending_club")
+```
+
+```{r}
+lending_club |> filter(funded_amnt>10000)
+```
+
+```{r}
+lending_club|> filter(term == "term_36")
+```
+
+```{r}
+lending_club |> group_by(verification_status) |> summarise(prom_funded_amnt = mean(funded_amnt), prom_annual_inc = mean(annual_inc))
+```
+
+```{r}
+lending_club |> ggplot(aes(x = funded_amnt, y = annual_inc, col = verification_status)) + geom_point()
+```
+
+```{r}
+lending_club |> ggplot(aes(x = funded_amnt, y = annual_inc, col = verification_status)) + geom_point() + facet_wrap(~Class)
+
+```
+
+```{r}
+
+lending_club |> ggplot(aes(x = int_rate, y = Class, fill = Class)) + geom_violin()
+
+```
+
+```{r}
+
+lending_club |> mutate(across(c(funded_amnt,annual_inc,int_rate),~ .x - mean(.x,na.rm = TRUE), .names = "{.col}_media_cero")) |> select(funded_amnt_media_cero,annual_inc_media_cero, int_rate_media_cero)
+lending_club |> mutate(across(c(funded_amnt,annual_inc,int_rate),~scale(.x), .names = "{.col}_media_cero")) |> select(funded_amnt_media_cero,annual_inc_media_cero, int_rate_media_cero)
+ 
+```
+
+```{r} 
+lending_club |> group_by(Class)|> summarise(across(where(is.numeric),list(media = ~mean(.x, na.rm = TRUE),desviacion_estandar = ~sd(.x,na.rm = TRUE)), .names = "{.col}_{.fn}"))
+
+
+```
+
+```{r}
+df <- lending_club |> transmute(ratio_ingreso_monto = annual_inc/funded_amnt, tasa_normalizada =pnorm(int_rate,mean = mean(int_rate),sd = sd(int_rate)), Class)
+```
+
+```{r}
+df |> ggplot(aes(x = ratio_ingreso_monto, y = Class, fill = Class)) + geom_boxplot()
+```
 
 #VARIOS
 
