@@ -1,0 +1,196 @@
+---
+title: "Examen de Ciencia de Datos con R"
+author: "Nombre del estudiante"
+date: ""
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+ 
+La presente evaluación es de carácter **individual** y tiene una duración total de **90 minutos**. A continuación, se detallan las condiciones y criterios que deben respetarse para su correcta realización:
+
+##  Modalidad de la prueba
+
+- Cada estudiante debe **resolver la prueba de forma individual**, sin interactuar con otras personas durante su desarrollo.  
+
+- Si surge alguna duda, pueden consultar directamente al equipo docente durante el horario asignado para la prueba.
+
+## Materiales permitidos
+
+Durante la evaluación se permite el uso exclusivo de los siguientes materiales:
+
+- El libro del curso: [https://r4ds.hadley.nz](https://r4ds.hadley.nz)  
+- Las presentaciones utilizadas en clase  
+- Tus apuntes personales  
+- Actividades y tareas ya realizadas en el marco del curso  
+
+**No está permitido** consultar ningún otro material adicional, ni intercambiar información, comentarios o sugerencias con personas ajenas al equipo docente.  
+Cualquier incumplimiento de estas condiciones implicará la **invalidación de la prueba**.
+
+---
+
+## Parte 1. Análisis Exploratorio con tidyverse (25 pts)
+
+### 1.1 Estructura de los datasets (5 pts)
+
+Describa brevemente la estructura de `attrition`
+
+```{r}
+library(modeldata)
+library(dplyr)
+library(survey)
+data(attrition)
+
+```
+
+
+```{r}
+
+```
+
+---
+
+### 1. Calcular la proporción de empleados con Attrition igual a "Yes" (5 pts)
+```{r}
+
+```
+
+### 2. Mostrar salario promedio (`MonthlyIncome`) por género (5 pts)
+```{r}
+
+```
+
+### 3. Promedio, primer quartil y cv de `DistanceFromHome` para quienes tienen OverTime igual a "Yes" (5 pts)
+```{r}
+ 
+```
+
+###  4. Crear nueva variable: Ingreso = "Alto" si MonthlyIncome > mediana, "Bajo" en caso contrario (5 pts)
+```{r}
+
+```
+
+#### 5. Calcular media y desviación estándar de Age, MonthlyIncome y DistanceFromHome con summarise(across) (5 pts)
+
+```{r}
+
+```
+
+---
+
+## Parte 2. Visualización de Datos (20 pts)
+
+### Gráfico de barras: proporción de Attrition  igual "Yes" por Education
+```{r}
+library(ggplot2)
+
+
+```
+
+### Convertir el gráfico anterior a plotly
+```{r}
+ 
+
+```
+
+### Comparar distribución de edades (Age) entre empleados que renunciaron (Attrition) y los que no.
+```{r}
+ 
+```
+
+### Crear un grafico para visualizar la relación entre MonthlyIncome y TotalWorkingYears, coloreado por Attrition.
+```{r}
+
+```
+
+
+---
+
+## Parte 3. Machine Learning con tidymodels (35 pts)
+
+### 3.1 Preparación de los datos (5 pts)
+División entrenamiento 70% y prueba 30%
+```{r}
+library(tidymodels)
+set.seed(123)
+
+
+```
+
+## 3.2 Ajuste de modelo Random Forest (10 pts)
+Random Forest para predecir Attrition
+
+### División entrenamiento 70% y prueba 30%
+```{r}
+
+```
+
+### 3.3 Evaluación del modelo (10 pts)
+Calcular Matriz de confusión y accuracy
+```{r}
+
+```
+
+### 3.4 Importancia de variables (10 pts)
+Extraer las 3 variables más importantes y comentar
+```{r}
+
+```
+
+---
+
+### Parte 4. Análisis de Muestras Complejas con srvyr (20 pts)
+
+
+El dataset `apistrat` proviene de un muestreo estratificado de escuelas en California.  
+Las variables clave de diseño son:
+
+```{r}
+library(srvyr)
+data(api)
+
+```
+
+- `stype`: tipo de escuela (estrato), con valores `E` (primaria), `M` (secundaria media) y `H` (secundaria alta).  
+- `pw`: peso muestral asociado a cada observación.
+
+- `fpc`: corrección por población finita para cada estrato
+
+### 4.1 Describa brevemente qué significan estas variables en el contexto de un diseño muestra y como afectan en las precisiones de las  estimaciones. 
+
+```{r}
+
+```
+
+
+### 4.2 Estimaciones con srvyr
+
+Crear el diseño muestral
+```{r}
+library(srvyr)
+data(api)
+
+```
+
+### 4.3 Estimar media y error estándar de api00 (5 pts)
+
+```{r}
+
+```
+
+### 4.4 Estimar media y error estándar de api00 por tipo de escuela (stype) 
+
+```{r}
+
+```
+
+###  4.5 Calcular CV e intervalos de confianza al 95% para ambas estimaciones.Interpretar resultados
+```{r}
+
+```
+
+---
+
+
